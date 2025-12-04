@@ -4,13 +4,17 @@ resource "aws_instance" "expense" {
   ami                    = "ami-09c813fb71547fc4f" # this AMI ID may change over the time
   instance_type          = each.value
   vpc_security_group_ids = [aws_security_group.allow_ssh_terraform.id]
-  tags = {
-    Name = each.key
-  }
+  tags = merge(
+    var.common_tags,
+    var.tags,
+    {
+      Name = each.key
+    }
+  )
 }
 
 resource "aws_security_group" "allow_ssh_terraform" {
-  name        = "allow_sshh" #allow_ssh is already there in my account
+  name        = "allow_ssh-${var.environment}" #allow_ssh is already there in my account
   description = "Allow port number 22 for SSH access"
 
   ingress {
@@ -30,7 +34,11 @@ resource "aws_security_group" "allow_ssh_terraform" {
     ipv6_cidr_blocks = ["::/0"]
   }
 
-  tags = {
-    Name = "allow_sshh"
-  }
+  tags = merge(
+    var.common_tags,
+    var.tags,
+    {
+      Name = "allow_ssh-${var.environment}"
+    }
+  )
 }
